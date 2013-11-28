@@ -6,6 +6,7 @@ from django.conf.urls.defaults import patterns, url
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from django.core.urlresolvers import NoReverseMatch, reverse, resolve, Resolver404, get_script_prefix
 from django.db import transaction
+from django.db.models.constants import LOOKUP_SEP
 from django.db.models.sql.constants import QUERY_TERMS
 from django.http import HttpResponse, HttpResponseNotFound
 from django.utils.cache import patch_cache_control
