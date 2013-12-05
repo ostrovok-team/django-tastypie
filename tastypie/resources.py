@@ -1,3 +1,4 @@
+
 import logging
 import warnings
 import django
@@ -705,7 +706,13 @@ class Resource(object):
                         setattr(bundle.obj, field_object.attribute, value)
                     elif not getattr(field_object, 'is_m2m', False):
                         if value is not None:
-                            setattr(bundle.obj, field_object.attribute, value.obj)
+                            # NOTE: A bug fix in Django (ticket #18153) fixes incorrect behavior
+                            # which Tastypie was relying on.  To fix this, we store value.obj to
+                            # be saved later in save_related.
+                            try:
+                                setattr(bundle.obj, field_object.attribute, value.obj)
+                            except (ValueError, ObjectDoesNotExist):
+                                bundle.related_objects_to_save[field_object.attribute] = value.obj
                         elif field_object.blank:
                             continue
                         elif field_object.null:
@@ -1912,7 +1919,7 @@ class ModelResource(Resource):
             try:
                 related_obj = getattr(bundle.obj, field_object.attribute)
             except ObjectDoesNotExist:
-                related_obj = None
+                related_obj = bundle.related_objects_to_save.get(field_object.attribute, None)
 
             # Because sometimes it's ``None`` & that's OK.
             if related_obj:
@@ -2015,3 +2022,4 @@ def convert_post_to_put(request):
 
 def convert_post_to_patch(request):
     return convert_post_to_VERB(request, verb='PATCH')
+
