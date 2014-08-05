@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 import hmac
 import time
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db import models
 from tastypie.utils import now
 
@@ -30,10 +29,8 @@ class ApiAccess(models.Model):
 
 if 'django.contrib.auth' in settings.INSTALLED_APPS:
     import uuid
-    AUTH_USER_MODEL = get_user_model()
-    username_field = AUTH_USER_MODEL.USERNAME_FIELD
     class ApiKey(models.Model):
-        user = models.OneToOneField(AUTH_USER_MODEL, related_name='api_key')
+        user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='api_key')
         key = models.CharField(max_length=128, blank=True, default='', db_index=True)
         created = models.DateTimeField(default=now)
 
