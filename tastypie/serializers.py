@@ -96,7 +96,7 @@ class Serializer(object):
         if datetime_formatting is not None:
             self.datetime_formatting = datetime_formatting
         else:
-            self.datetime_formatting = getattr(settings, 'TASTYPIE_DATETIME_FORMATTING', 'iso-8601')
+            self.datetime_formatting = getattr(settings, 'TASTYPIE_DATETIME_FORMATTING', '%Y-%m-%dT%H:%M:%SZ')
 
         self.supported_formats = []
 
@@ -173,13 +173,7 @@ class Serializer(object):
 
         Default is ``iso-8601``, which looks like "03:02:14".
         """
-        if self.datetime_formatting == 'rfc-2822':
-            return format_time(data)
-        if self.datetime_formatting == 'iso-8601-strict':
-            # Remove microseconds to strictly adhere to iso-8601
-            data = (datetime.datetime.combine(datetime.date(1,1,1),data) - datetime.timedelta(microseconds = data.microsecond)).time()
-
-        return data.isoformat()
+        return data.strftime(self.datetime_formatting)
 
     def serialize(self, bundle, format='application/json', options=None):
         """
