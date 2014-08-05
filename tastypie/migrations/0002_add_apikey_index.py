@@ -3,8 +3,10 @@ from __future__ import unicode_literals
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
+from django.contrib.auth import get_user_model
 from django.db import models
-from tastypie.compat import AUTH_USER_MODEL
+
+AUTH_USER_MODEL = get_user_model()
 
 
 class Migration(SchemaMigration):
