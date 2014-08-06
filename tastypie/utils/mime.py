@@ -57,7 +57,4 @@ def build_content_type(format, encoding='utf-8'):
     if 'charset' in format:
         return format
 
-    if format in ('application/json', 'text/javascript'):
-        return format
-
     return "%s; charset=%s" % (format, encoding)
