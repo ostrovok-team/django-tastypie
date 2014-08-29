@@ -9,7 +9,7 @@ from django.core.urlresolvers import NoReverseMatch, reverse, resolve, Resolver4
 from django.db import transaction
 from django.db.models.constants import LOOKUP_SEP
 from django.db.models.sql.constants import QUERY_TERMS
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, response, HttpResponseNotFound
 from django.utils.cache import patch_cache_control
 from tastypie.authentication import Authentication
 from tastypie.authorization import ReadOnlyAuthorization
@@ -434,7 +434,7 @@ class Resource(object):
         # If what comes back isn't a ``HttpResponse``, assume that the
         # request was accepted and that some action occurred. This also
         # prevents Django from freaking out.
-        if not isinstance(response, HttpResponse):
+        if not isinstance(response, response.HttpResponseBase):
             return http.HttpNoContent()
 
         return response
