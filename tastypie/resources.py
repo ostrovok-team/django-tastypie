@@ -12,7 +12,8 @@ from django.core.signals import got_request_exception
 from django.db import transaction
 from django.db.models.constants import LOOKUP_SEP
 from django.db.models.sql.constants import QUERY_TERMS
-from django.http import HttpResponse, HttpResponseNotFound, Http404
+from django.http import HttpResponse, HttpResponseNotFound, Http404, \
+    StreamingHttpResponse
 from django.utils.cache import patch_cache_control, patch_vary_headers
 from django.utils.html import escape
 from django.utils import six
@@ -469,7 +470,7 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
         # If what comes back isn't a ``HttpResponse``, assume that the
         # request was accepted and that some action occurred. This also
         # prevents Django from freaking out.
-        if not isinstance(response, HttpResponse):
+        if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
             return http.HttpNoContent()
 
         return response
