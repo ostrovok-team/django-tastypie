@@ -3,6 +3,7 @@ import hmac
 import time
 from django.conf import settings
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from tastypie.utils import now
 
 try:
@@ -11,7 +12,7 @@ except ImportError:
     import sha
     sha1 = sha.sha
 
-
+@python_2_unicode_compatible
 class ApiAccess(models.Model):
     """A simple model for use with the ``CacheDBThrottle`` behaviors."""
     identifier = models.CharField(max_length=255)
@@ -19,8 +20,8 @@ class ApiAccess(models.Model):
     request_method = models.CharField(max_length=10, blank=True, default='')
     accessed = models.PositiveIntegerField()
 
-    def __unicode__(self):
-        return u"%s @ %s" % (self.identifier, self.accessed)
+    def __str__(self):
+        return "%s @ %s" % (self.identifier, self.accessed)
 
     def save(self, *args, **kwargs):
         self.accessed = int(time.time())
@@ -29,8 +30,9 @@ class ApiAccess(models.Model):
 
 if 'django.contrib.auth' in settings.INSTALLED_APPS:
     import uuid
+    from tastypie.compat import AUTH_USER_MODEL
     class ApiKey(models.Model):
-        user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='api_key')
+        user = models.OneToOneField(AUTH_USER_MODEL, related_name='api_key')
         key = models.CharField(max_length=128, blank=True, default='', db_index=True)
         created = models.DateTimeField(default=now)
 

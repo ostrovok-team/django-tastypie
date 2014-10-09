@@ -805,12 +805,10 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
         # We mangle the path a bit further & run URL resolution against *only*
         # the current class. This ought to prevent bad URLs from resolving to
         # incorrect data.
-        try:
-            found_at = chomped_uri.index(self._meta.resource_name)
-            chomped_uri = chomped_uri[found_at:]
-        except ValueError:
+        found_at = chomped_uri.rfind(self._meta.resource_name)
+        if found_at == -1:
             raise NotFound("An incorrect URL was provided '%s' for the '%s' resource." % (uri, self.__class__.__name__))
-
+        chomped_uri = chomped_uri[found_at:]
         try:
             for url_resolver in getattr(self, 'urls', []):
                 result = url_resolver.resolve(chomped_uri)
@@ -2209,7 +2207,7 @@ class BaseModelResource(Resource):
         self.authorized_delete_detail(self.get_object_list(bundle.request), bundle)
         bundle.obj.delete()
 
-    @transaction.atomic()
+    @transaction.commit_on_success()
     def patch_list(self, request, **kwargs):
         """
         An ORM-specific implementation of ``patch_list``.
@@ -2231,7 +2229,7 @@ class BaseModelResource(Resource):
                 bundle.obj.delete()
 
     def create_identifier(self, obj):
-        return u"%s.%s.%s" % (obj._meta.app_label, obj._meta.model_name, obj.pk)
+        return u"%s.%s.%s" % (obj._meta.app_label, obj._meta.module_name, obj.pk)
 
     def save(self, bundle, skip_errors=False):
         self.is_valid(bundle)

@@ -5,12 +5,13 @@ import time
 import uuid
 
 from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate
 from django.core.exceptions import ImproperlyConfigured
 from django.middleware.csrf import _sanitize_token, constant_time_compare
 from django.utils.http import same_origin
 from django.utils.translation import ugettext as _
 from tastypie.http import HttpUnauthorized
+from tastypie.compat import get_user_model, get_username_field
 
 try:
     from hashlib import sha1
@@ -179,8 +180,6 @@ class ApiKeyAuthentication(Authentication):
         Should return either ``True`` if allowed, ``False`` if not or an
         ``HttpResponse`` if you need something custom.
         """
-        User = get_user_model()
-        username_field = User.USERNAME_FIELD
 
         try:
             username, api_key = self.extract_credentials(request)
@@ -189,6 +188,9 @@ class ApiKeyAuthentication(Authentication):
 
         if not username or not api_key:
             return self._unauthorized()
+
+        username_field = get_username_field()
+        User = get_user_model()
 
         try:
             lookup_kwargs = {username_field: username}
@@ -280,9 +282,8 @@ class SessionAuthentication(Authentication):
 
         This implementation returns the user's username.
         """
-        User = get_user_model()
-        username_field = User.USERNAME_FIELD
-        return getattr(request.user, username_field)
+
+        return getattr(request.user, get_username_field())
 
 
 class DigestAuthentication(Authentication):
@@ -368,8 +369,9 @@ class DigestAuthentication(Authentication):
         return True
 
     def get_user(self, username):
+        username_field = get_username_field()
         User = get_user_model()
-        username_field = User.USERNAME_FIELD
+
         try:
             lookup_kwargs = {username_field: username}
             user = User.objects.get(**lookup_kwargs)
