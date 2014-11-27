@@ -143,7 +143,7 @@ class ApiKeyAuthentication(Authentication):
         Should return either ``True`` if allowed, ``False`` if not or an
         ``HttpResponse`` if you need something custom.
         """
-        from django.contrib.auth.models import User
+        from tastypie.compat import AUTH_USER_MODEL
 
         username = request.GET.get('username') or request.POST.get('username')
         api_key = request.GET.get('api_key') or request.POST.get('api_key')
@@ -152,8 +152,8 @@ class ApiKeyAuthentication(Authentication):
             return self._unauthorized()
 
         try:
-            user = User.objects.get(username=username)
-        except (User.DoesNotExist, User.MultipleObjectsReturned):
+            user = AUTH_USER_MODEL.objects.get(username=username)
+        except (AUTH_USER_MODEL.DoesNotExist, AUTH_USER_MODEL.MultipleObjectsReturned):
             return self._unauthorized()
 
         request.user = user
@@ -255,11 +255,11 @@ class DigestAuthentication(Authentication):
         return True
 
     def get_user(self, username):
-        from django.contrib.auth.models import User
+        from tastypie.compat import AUTH_USER_MODEL
 
         try:
-            user = User.objects.get(username=username)
-        except (User.DoesNotExist, User.MultipleObjectsReturned):
+            user = AUTH_USER_MODEL.objects.get(username=username)
+        except (AUTH_USER_MODEL.DoesNotExist, AUTH_USER_MODEL.MultipleObjectsReturned):
             return False
 
         return user
